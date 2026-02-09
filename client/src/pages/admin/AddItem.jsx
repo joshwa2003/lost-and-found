@@ -28,7 +28,6 @@ const AddItem = () => {
             ...prev,
             [name]: value
         }));
-        // Clear error for this field
         if (errors[name]) {
             setErrors(prev => ({
                 ...prev,
@@ -42,7 +41,6 @@ const AddItem = () => {
         const file = e.target.files[0];
 
         if (file) {
-            // Validate file type
             const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
             if (!validTypes.includes(file.type)) {
                 setErrors(prev => ({
@@ -52,7 +50,6 @@ const AddItem = () => {
                 return;
             }
 
-            // Validate file size (5MB)
             if (file.size > 5 * 1024 * 1024) {
                 setErrors(prev => ({
                     ...prev,
@@ -67,7 +64,6 @@ const AddItem = () => {
                 image: ''
             }));
 
-            // Create preview
             const reader = new FileReader();
             reader.onloadend = () => {
                 setImagePreview(reader.result);
@@ -76,56 +72,34 @@ const AddItem = () => {
         }
     };
 
-    // Clear image
     const clearImage = () => {
         setImage(null);
         setImagePreview(null);
-        // Reset file input
         const fileInput = document.getElementById('image-upload');
         if (fileInput) fileInput.value = '';
     };
 
-    // Validate form
     const validateForm = () => {
         const newErrors = {};
 
-        if (!formData.title.trim()) {
-            newErrors.title = 'Title is required';
-        }
-
-        if (!formData.description.trim()) {
-            newErrors.description = 'Description is required';
-        }
-
-        if (!formData.foundLocation.trim()) {
-            newErrors.foundLocation = 'Found location is required';
-        }
-
-        if (!formData.foundDate) {
-            newErrors.foundDate = 'Found date is required';
-        }
-
-        if (!image) {
-            newErrors.image = 'Please upload an image';
-        }
+        if (!formData.title.trim()) newErrors.title = 'Title is required';
+        if (!formData.description.trim()) newErrors.description = 'Description is required';
+        if (!formData.foundLocation.trim()) newErrors.foundLocation = 'Found location is required';
+        if (!formData.foundDate) newErrors.foundDate = 'Found date is required';
+        if (!image) newErrors.image = 'Please upload an image';
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
-    // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Validate
-        if (!validateForm()) {
-            return;
-        }
+        if (!validateForm()) return;
 
         setLoading(true);
 
         try {
-            // Create FormData
             const data = new FormData();
             data.append('title', formData.title);
             data.append('description', formData.description);
@@ -133,14 +107,10 @@ const AddItem = () => {
             data.append('foundDate', formData.foundDate);
             data.append('image', image);
 
-            // Call API
             const response = await addItem(data);
 
             if (response.success) {
-                // Show success message (you can add toast here)
                 alert('Item added successfully!');
-
-                // Reset form
                 setFormData({
                     title: '',
                     description: '',
@@ -148,8 +118,6 @@ const AddItem = () => {
                     foundDate: ''
                 });
                 clearImage();
-
-                // Redirect to manage items
                 navigate('/admin/manage-items');
             }
         } catch (error) {
@@ -162,24 +130,20 @@ const AddItem = () => {
 
     return (
         <div className="space-y-6">
-            {/* Page Header */}
-            <div className="relative bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl p-8 text-white overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32"></div>
-                <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full -ml-24 -mb-24"></div>
-                <div className="relative z-10">
-                    <h1 className="text-3xl md:text-4xl font-bold mb-2">
-                        Add Lost Item ➕
-                    </h1>
-                    <p className="text-cyan-100 text-lg">Register a new found item in the system</p>
-                </div>
+            {/* Professional Header */}
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
+                <h1 className="text-3xl font-bold text-slate-900 mb-2">
+                    Add Lost Item
+                </h1>
+                <p className="text-slate-600">Register a new found item in the system</p>
             </div>
 
             {/* Form Card */}
-            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-8">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Title */}
                     <div>
-                        <label htmlFor="title" className="block text-sm font-bold text-slate-900 mb-2">
+                        <label htmlFor="title" className="block text-sm font-semibold text-slate-900 mb-2">
                             Item Title *
                         </label>
                         <input
@@ -188,21 +152,18 @@ const AddItem = () => {
                             name="title"
                             value={formData.title}
                             onChange={handleChange}
-                            className={`w-full px-4 py-3 rounded-xl border ${errors.title ? 'border-red-500' : 'border-slate-300'
-                                } focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all`}
+                            className={`w-full px-4 py-3 rounded-lg border ${errors.title ? 'border-red-500' : 'border-slate-300'
+                                } focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all`}
                             placeholder="e.g., Blue Water Bottle"
                         />
                         {errors.title && (
-                            <p className="mt-2 text-sm text-red-500 flex items-center">
-                                <span className="mr-1">⚠️</span>
-                                {errors.title}
-                            </p>
+                            <p className="mt-2 text-sm text-red-500">{errors.title}</p>
                         )}
                     </div>
 
                     {/* Description */}
                     <div>
-                        <label htmlFor="description" className="block text-sm font-bold text-slate-900 mb-2">
+                        <label htmlFor="description" className="block text-sm font-semibold text-slate-900 mb-2">
                             Description *
                         </label>
                         <textarea
@@ -211,23 +172,19 @@ const AddItem = () => {
                             value={formData.description}
                             onChange={handleChange}
                             rows="4"
-                            className={`w-full px-4 py-3 rounded-xl border ${errors.description ? 'border-red-500' : 'border-slate-300'
-                                } focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all resize-none`}
+                            className={`w-full px-4 py-3 rounded-lg border ${errors.description ? 'border-red-500' : 'border-slate-300'
+                                } focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all resize-none`}
                             placeholder="Describe the item in detail..."
                         />
                         {errors.description && (
-                            <p className="mt-2 text-sm text-red-500 flex items-center">
-                                <span className="mr-1">⚠️</span>
-                                {errors.description}
-                            </p>
+                            <p className="mt-2 text-sm text-red-500">{errors.description}</p>
                         )}
                     </div>
 
                     {/* Location and Date Row */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Found Location */}
                         <div>
-                            <label htmlFor="foundLocation" className="block text-sm font-bold text-slate-900 mb-2">
+                            <label htmlFor="foundLocation" className="block text-sm font-semibold text-slate-900 mb-2">
                                 Found Location *
                             </label>
                             <input
@@ -236,21 +193,17 @@ const AddItem = () => {
                                 name="foundLocation"
                                 value={formData.foundLocation}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-3 rounded-xl border ${errors.foundLocation ? 'border-red-500' : 'border-slate-300'
-                                    } focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all`}
+                                className={`w-full px-4 py-3 rounded-lg border ${errors.foundLocation ? 'border-red-500' : 'border-slate-300'
+                                    } focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all`}
                                 placeholder="e.g., Cardio Section"
                             />
                             {errors.foundLocation && (
-                                <p className="mt-2 text-sm text-red-500 flex items-center">
-                                    <span className="mr-1">⚠️</span>
-                                    {errors.foundLocation}
-                                </p>
+                                <p className="mt-2 text-sm text-red-500">{errors.foundLocation}</p>
                             )}
                         </div>
 
-                        {/* Found Date */}
                         <div>
-                            <label htmlFor="foundDate" className="block text-sm font-bold text-slate-900 mb-2">
+                            <label htmlFor="foundDate" className="block text-sm font-semibold text-slate-900 mb-2">
                                 Found Date *
                             </label>
                             <input
@@ -260,21 +213,18 @@ const AddItem = () => {
                                 value={formData.foundDate}
                                 onChange={handleChange}
                                 max={new Date().toISOString().split('T')[0]}
-                                className={`w-full px-4 py-3 rounded-xl border ${errors.foundDate ? 'border-red-500' : 'border-slate-300'
-                                    } focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all`}
+                                className={`w-full px-4 py-3 rounded-lg border ${errors.foundDate ? 'border-red-500' : 'border-slate-300'
+                                    } focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all`}
                             />
                             {errors.foundDate && (
-                                <p className="mt-2 text-sm text-red-500 flex items-center">
-                                    <span className="mr-1">⚠️</span>
-                                    {errors.foundDate}
-                                </p>
+                                <p className="mt-2 text-sm text-red-500">{errors.foundDate}</p>
                             )}
                         </div>
                     </div>
 
                     {/* Image Upload */}
                     <div>
-                        <label className="block text-sm font-bold text-slate-900 mb-2">
+                        <label className="block text-sm font-semibold text-slate-900 mb-2">
                             Item Image *
                         </label>
 
@@ -290,13 +240,13 @@ const AddItem = () => {
                                 <label
                                     htmlFor="image-upload"
                                     className={`flex flex-col items-center justify-center w-full h-64 border-2 ${errors.image ? 'border-red-500' : 'border-slate-300'
-                                        } border-dashed rounded-xl cursor-pointer bg-gradient-to-br from-slate-50 to-cyan-50 hover:from-cyan-50 hover:to-blue-50 transition-all duration-300`}
+                                        } border-dashed rounded-lg cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors`}
                                 >
-                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                        <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl flex items-center justify-center text-white text-3xl mb-4 shadow-lg">
+                                    <div className="flex flex-col items-center justify-center py-6">
+                                        <div className="w-16 h-16 bg-sky-100 rounded-xl flex items-center justify-center text-4xl mb-4">
                                             📷
                                         </div>
-                                        <p className="mb-2 text-sm font-bold text-slate-700">
+                                        <p className="mb-2 text-sm font-semibold text-slate-700">
                                             Click to upload image
                                         </p>
                                         <p className="text-xs text-slate-500">
@@ -310,12 +260,12 @@ const AddItem = () => {
                                 <img
                                     src={imagePreview}
                                     alt="Preview"
-                                    className="w-full h-64 object-contain rounded-xl border-2 border-slate-200 bg-gradient-to-br from-slate-50 to-cyan-50"
+                                    className="w-full h-64 object-contain rounded-lg border-2 border-slate-200 bg-slate-50"
                                 />
                                 <button
                                     type="button"
                                     onClick={clearImage}
-                                    className="absolute top-4 right-4 bg-red-500 text-white p-3 rounded-xl hover:bg-red-600 transition-all shadow-lg"
+                                    className="absolute top-4 right-4 bg-red-500 text-white p-3 rounded-lg hover:bg-red-600 transition-colors shadow-lg"
                                 >
                                     <span className="text-lg">🗑️</span>
                                 </button>
@@ -323,10 +273,7 @@ const AddItem = () => {
                         )}
 
                         {errors.image && (
-                            <p className="mt-2 text-sm text-red-500 flex items-center">
-                                <span className="mr-1">⚠️</span>
-                                {errors.image}
-                            </p>
+                            <p className="mt-2 text-sm text-red-500">{errors.image}</p>
                         )}
                     </div>
 
@@ -335,7 +282,7 @@ const AddItem = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="flex-1 relative px-6 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl font-bold hover:from-cyan-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden group"
+                            className="flex-1 px-6 py-4 bg-sky-500 text-white rounded-lg font-semibold hover:bg-sky-600 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loading ? (
                                 <span className="flex items-center justify-center">
@@ -346,20 +293,14 @@ const AddItem = () => {
                                     Adding Item...
                                 </span>
                             ) : (
-                                <>
-                                    <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-                                    <span className="relative flex items-center justify-center">
-                                        <span className="mr-2">Add Item</span>
-                                        <span className="text-xl">✅</span>
-                                    </span>
-                                </>
+                                'Add Item'
                             )}
                         </button>
 
                         <button
                             type="button"
                             onClick={() => navigate('/admin/manage-items')}
-                            className="flex-1 px-6 py-4 bg-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-300 transition-all"
+                            className="flex-1 px-6 py-4 bg-slate-200 text-slate-700 rounded-lg font-semibold hover:bg-slate-300 transition-colors"
                         >
                             Cancel
                         </button>
