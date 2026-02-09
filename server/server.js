@@ -25,9 +25,18 @@ connectDB().then(() => {
 
 const app = express();
 
+// CORS Configuration
+const corsOptions = {
+  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+  credentials: true,
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
 // Middleware
+app.use(cors(corsOptions)); // Enable CORS with configuration
 app.use(express.json()); // Body parser
-app.use(cors()); // Enable CORS
 app.use(helmet()); // Security headers
 app.use(morgan('dev')); // Logging
 
@@ -47,7 +56,7 @@ app.get('/api/test', (req, res) => {
 app.use(notFound);
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 app.listen(PORT, () => {
   console.log(`\x1b[33m%s\x1b[0m`, `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);

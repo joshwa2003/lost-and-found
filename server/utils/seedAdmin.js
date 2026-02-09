@@ -11,14 +11,14 @@ const createDefaultAdmin = async () => {
             const adminUser = await User.create({
                 name: 'System Admin',
                 email: 'admin@gym.com',
-                password: 'admin@123',
+                password: 'admin123',
                 role: 'admin',
                 phone: '1234567890',
                 membershipType: 'Staff',
                 isActive: true
             });
 
-            console.log(`\x1b[32m%s\x1b[0m`, `Default Admin Created: ${adminUser.email} / admin@123`);
+            console.log(`\x1b[32m%s\x1b[0m`, `Default Admin Created: ${adminUser.email} / admin123`);
         } else {
             // console.log('Admin user already exists');
         }

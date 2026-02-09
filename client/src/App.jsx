@@ -46,12 +46,12 @@ function App() {
 
             {/* CTA Buttons */}
             <div className="hidden md:flex items-center space-x-3">
-              <button className="px-6 py-2.5 text-slate-700 hover:text-cyan-600 font-medium transition-colors">
+              <Link to="/login" className="px-6 py-2.5 text-slate-700 hover:text-cyan-600 font-medium transition-colors">
                 Login
-              </button>
-              <button className="px-6 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg font-semibold hover:from-cyan-500 hover:to-blue-500 transition-all shadow-md">
+              </Link>
+              <Link to="/login" className="px-6 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg font-semibold hover:from-cyan-500 hover:to-blue-500 transition-all shadow-md">
                 Get Started
-              </button>
+              </Link>
             </div>
 
             {/* Mobile Menu Button */}
@@ -81,12 +81,12 @@ function App() {
                   {item}
                 </a>
               ))}
-              <button className="w-full px-6 py-2.5 text-slate-700 hover:bg-slate-100 rounded-lg font-medium transition-colors">
+              <Link to="/login" className="block w-full px-6 py-2.5 text-slate-700 hover:bg-slate-100 rounded-lg font-medium transition-colors">
                 Login
-              </button>
-              <button className="w-full px-6 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg font-semibold">
+              </Link>
+              <Link to="/login" className="block w-full px-6 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg font-semibold">
                 Get Started
-              </button>
+              </Link>
             </div>
           )}
         </nav>
