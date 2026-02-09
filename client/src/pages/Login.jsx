@@ -103,6 +103,15 @@ const Login = () => {
                         </button>
                     </form>
 
+                    <div className="mt-6 text-center">
+                        <p className="text-slate-600 font-medium">
+                            Don't have an account?{' '}
+                            <Link to="/register" className="text-cyan-600 hover:text-cyan-700 font-bold hover:underline transition-colors">
+                                Sign Up
+                            </Link>
+                        </p>
+                    </div>
+
                     {/* Demo Credentials Info */}
                     <div className="mt-6 p-4 bg-cyan-50 rounded-lg border border-cyan-200">
                         <p className="text-xs text-cyan-800 font-semibold mb-2">📌 Demo Credentials:</p>
