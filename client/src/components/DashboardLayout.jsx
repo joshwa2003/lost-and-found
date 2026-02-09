@@ -24,6 +24,7 @@ const DashboardLayout = () => {
     const userNavItems = [
         { name: 'Dashboard', path: '/user/dashboard', icon: '📊' },
         { name: 'Browse Items', path: '/user/items', icon: '🔍' },
+        { name: 'My Claims', path: '/user/my-claims', icon: '🙋' },
         { name: 'My Reports', path: '/user/my-reports', icon: '📝' },
     ];
 
@@ -130,8 +131,8 @@ const DashboardLayout = () => {
                                 to={item.path}
                                 onClick={() => setSidebarOpen(false)}
                                 className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${isActive(item.path)
-                                        ? 'bg-sky-50 text-sky-700 font-semibold border-l-4 border-sky-500'
-                                        : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                                    ? 'bg-sky-50 text-sky-700 font-semibold border-l-4 border-sky-500'
+                                    : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
                                     }`}
                             >
                                 <span className="text-2xl">{item.icon}</span>

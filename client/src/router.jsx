@@ -14,6 +14,7 @@ import ManageItems from './pages/admin/ManageItems';
 import UserDashboard from './pages/user/UserDashboard';
 import ViewItems from './pages/user/ViewItems';
 import ItemDetails from './pages/user/ItemDetails';
+import MyClaims from './pages/user/MyClaims';
 
 const router = createBrowserRouter([
     {
@@ -73,6 +74,10 @@ const router = createBrowserRouter([
             {
                 path: 'item-details/:id',
                 element: <ItemDetails />,
+            },
+            {
+                path: 'my-claims',
+                element: <MyClaims />,
             },
         ],
     },

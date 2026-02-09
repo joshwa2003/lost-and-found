@@ -1,7 +1,9 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { getItemById } from '../../services/itemService';
+import { getUserClaims } from '../../services/claimService';
 import { useAuth } from '../../context/AuthContext';
+import ClaimForm from '../../components/ClaimForm';
 
 const ItemDetails = () => {
     const { id } = useParams();
@@ -12,17 +14,33 @@ const ItemDetails = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showClaimModal, setShowClaimModal] = useState(false);
+    const [userClaimStatus, setUserClaimStatus] = useState(null); // 'pending', 'approved', 'rejected', or null
+    const [successMessage, setSuccessMessage] = useState('');
 
     useEffect(() => {
-        fetchItemDetails();
+        fetchData();
     }, [id]);
 
-    const fetchItemDetails = async () => {
+    const fetchData = async () => {
         try {
             setLoading(true);
-            const response = await getItemById(id);
-            if (response.success) {
-                setItem(response.item);
+
+            // Fetch item details
+            const itemResponse = await getItemById(id);
+
+            if (itemResponse.success) {
+                setItem(itemResponse.item);
+
+                // Check if user has already claimed this item
+                try {
+                    const claimsResponse = await getUserClaims();
+                    const myClaim = claimsResponse.data.find(c => c.itemId._id === id || c.itemId === id);
+                    if (myClaim) {
+                        setUserClaimStatus(myClaim.status);
+                    }
+                } catch (err) {
+                    console.error('Error checking user claims:', err);
+                }
             } else {
                 setError('Item not found');
             }
@@ -34,10 +52,15 @@ const ItemDetails = () => {
         }
     };
 
-    const handleClaim = () => {
-        // Day 10 Implementation Placeholder
+    const handleClaimSuccess = () => {
         setShowClaimModal(false);
-        alert('Claim functionality coming soon! (Day 10)');
+        setSuccessMessage('Claim submitted successfully! Check "My Claims" for updates.');
+        setUserClaimStatus('pending'); // Optimistically update status
+
+        // Clear success message after 5 seconds
+        setTimeout(() => {
+            setSuccessMessage('');
+        }, 5000);
     };
 
     const formatDate = (dateString) => {
@@ -76,8 +99,65 @@ const ItemDetails = () => {
         );
     }
 
+    // Determine Button State
+    const renderActionButton = () => {
+        // 1. If user already claimed it
+        if (userClaimStatus) {
+            const statusConfig = {
+                pending: { text: 'Claim Pending', icon: '⏳', bg: 'bg-amber-100 text-amber-800 border-amber-200' },
+                approved: { text: 'Claim Approved', icon: '✅', bg: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
+                rejected: { text: 'Claim Rejected', icon: '❌', bg: 'bg-red-100 text-red-800 border-red-200' }
+            };
+            const config = statusConfig[userClaimStatus] || statusConfig.pending;
+
+            return (
+                <button
+                    disabled
+                    className={`w-full py-4 rounded-xl font-bold text-lg cursor-not-allowed flex items-center justify-center border ${config.bg}`}
+                >
+                    <span className="mr-2">{config.icon}</span> {config.text}
+                </button>
+            );
+        }
+
+        // 2. If item is unavailable (claimed by someone else)
+        if (item.status !== 'available') {
+            return (
+                <button
+                    disabled
+                    className="w-full py-4 bg-slate-100 text-slate-400 rounded-xl font-bold text-lg cursor-not-allowed flex items-center justify-center"
+                >
+                    <span className="mr-2">🔒</span> Item Already Claimed
+                </button>
+            );
+        }
+
+        // 3. Available to claim
+        return (
+            <button
+                onClick={() => setShowClaimModal(true)}
+                className="w-full py-4 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-bold text-lg shadow-sm hover:shadow-md transition-all active:scale-[0.99]"
+            >
+                Claim This Item
+            </button>
+        );
+    };
+
     return (
         <div className="max-w-6xl mx-auto px-4">
+            {/* Success Toast */}
+            {successMessage && (
+                <div className="fixed top-24 right-6 z-50 animate-in slide-in-from-right fade-in duration-300">
+                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-6 py-4 rounded-xl shadow-lg flex items-center">
+                        <span className="text-2xl mr-3">🎉</span>
+                        <div>
+                            <h4 className="font-bold">Success!</h4>
+                            <p className="text-sm">{successMessage}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Back Button */}
             <button
                 onClick={() => navigate('/user/items')}
@@ -117,8 +197,8 @@ const ItemDetails = () => {
                         {/* Status Badge Overlay */}
                         <div className="absolute top-6 left-6">
                             <span className={`px-4 py-2 rounded-full text-sm font-bold shadow-sm ${item.status === 'available'
-                                    ? 'bg-emerald-500 text-white'
-                                    : 'bg-amber-500 text-white'
+                                ? 'bg-emerald-500 text-white'
+                                : 'bg-amber-500 text-white'
                                 }`}>
                                 {item.status === 'available' ? 'Available' : 'Claimed'}
                             </span>
@@ -162,7 +242,7 @@ const ItemDetails = () => {
                                 </p>
                             </div>
 
-                            {item.status === 'available' && (
+                            {item.status === 'available' && !userClaimStatus && (
                                 <div className="bg-sky-50 border border-sky-100 rounded-lg p-5 mb-8">
                                     <h3 className="text-sm font-bold text-sky-900 mb-2 flex items-center">
                                         <span className="mr-2">ℹ️</span> How to Claim
@@ -177,21 +257,7 @@ const ItemDetails = () => {
 
                         {/* Actions */}
                         <div className="border-t border-slate-100 pt-8 mt-auto">
-                            {item.status === 'available' ? (
-                                <button
-                                    onClick={() => setShowClaimModal(true)}
-                                    className="w-full py-4 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-bold text-lg shadow-sm hover:shadow-md transition-all active:scale-[0.99]"
-                                >
-                                    Claim This Item
-                                </button>
-                            ) : (
-                                <button
-                                    disabled
-                                    className="w-full py-4 bg-slate-100 text-slate-400 rounded-xl font-bold text-lg cursor-not-allowed flex items-center justify-center"
-                                >
-                                    <span className="mr-2">🔒</span> Item Already Claimed
-                                </button>
-                            )}
+                            {renderActionButton()}
                         </div>
                     </div>
                 </div>
@@ -199,34 +265,12 @@ const ItemDetails = () => {
 
             {/* Claim Modal */}
             {showClaimModal && (
-                <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl transform transition-all scale-100">
-                        <div className="text-center mb-6">
-                            <div className="w-16 h-16 bg-sky-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <span className="text-3xl">👋</span>
-                            </div>
-                            <h2 className="text-2xl font-bold text-slate-900 mb-2">Claim Item?</h2>
-                            <p className="text-slate-600">
-                                You are about to initiate a claim for <strong>{item.title}</strong>.
-                            </p>
-                        </div>
-
-                        <div className="flex gap-3">
-                            <button
-                                onClick={() => setShowClaimModal(false)}
-                                className="flex-1 py-3 bg-slate-100 text-slate-700 rounded-lg font-semibold hover:bg-slate-200 transition-colors"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleClaim}
-                                className="flex-1 py-3 bg-sky-500 text-white rounded-lg font-semibold hover:bg-sky-600 transition-colors shadow-sm"
-                            >
-                                Confirm Claim
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <ClaimForm
+                    itemId={item._id}
+                    itemTitle={item.title}
+                    onClose={() => setShowClaimModal(false)}
+                    onSuccess={handleClaimSuccess}
+                />
             )}
         </div>
     );
