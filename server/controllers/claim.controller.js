@@ -1,5 +1,6 @@
 import Claim from '../models/claim.model.js';
 import Item from '../models/item.model.js';
+import { createNotification } from './notification.controller.js';
 
 /**
  * @desc    Create a new claim
@@ -43,6 +44,14 @@ export const createClaim = async (req, res) => {
             userId,
             status: 'pending'
         });
+
+        // 5. Notify User
+        await createNotification(
+            userId,
+            'Claim Submitted',
+            `Your claim for "${item.title}" has been submitted successfully.`,
+            'success'
+        );
 
         res.status(201).json({
             success: true,
@@ -164,7 +173,17 @@ export const updateClaimStatus = async (req, res) => {
             item.status = 'claimed';
             await item.save();
 
+            // Notify User of Approval
+            await createNotification(
+                claim.userId,
+                'Claim Approved!',
+                `Your claim for item "${item.title}" has been APPROVED. Please visit the admin desk to collect it.`,
+                'success'
+            );
+
             // 4. Reject all OTHER pending claims for this item
+            // (Notifications for rejected users could be added here loop-wise if needed, but keeping simple for now)
+
             await Claim.updateMany(
                 {
                     itemId: claim.itemId,
@@ -182,11 +201,25 @@ export const updateClaimStatus = async (req, res) => {
             claim.status = 'collected';
             if (adminComment) claim.adminComment = adminComment;
             await claim.save();
+
+            // Notification handled in item.controller for completion usually, 
+            // but if this is called directly we should add one?
+            // Rely on Item Controller's markAsCollected for the main logic.
+
         } else {
             // Just Rejecting
             claim.status = 'rejected';
             claim.adminComment = adminComment;
             await claim.save();
+
+            // Notify User of Rejection
+            const rejectionMsg = adminComment ? `Reason: ${adminComment}` : 'Verification failed.';
+            await createNotification(
+                claim.userId,
+                'Claim Rejected',
+                `Your claim has been rejected. ${rejectionMsg}`,
+                'error'
+            );
         }
 
         res.status(200).json({

@@ -1,6 +1,7 @@
 import Item from '../models/item.model.js';
 import fs from 'fs';
 import path from 'path';
+import { createNotification } from './notification.controller.js';
 
 /**
  * @desc    Add a new lost/found item
@@ -281,6 +282,15 @@ export const markItemAsCollected = async (req, res) => {
         }
 
         await item.save();
+
+        if (collectedBy) {
+            await createNotification(
+                collectedBy,
+                'Item Collected',
+                `You have successfully collected "${item.title}". Thank you!`,
+                'info'
+            );
+        }
 
         res.status(200).json({
             success: true,

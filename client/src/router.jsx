@@ -17,6 +17,7 @@ import UserDashboard from './pages/user/UserDashboard';
 import ViewItems from './pages/user/ViewItems';
 import ItemDetails from './pages/user/ItemDetails';
 import MyClaims from './pages/user/MyClaims';
+import Notifications from './pages/user/Notifications';
 
 const router = createBrowserRouter([
     {
@@ -88,6 +89,10 @@ const router = createBrowserRouter([
             {
                 path: 'my-claims',
                 element: <MyClaims />,
+            },
+            {
+                path: 'notifications',
+                element: <Notifications />,
             },
         ],
     },

@@ -14,6 +14,7 @@ import announcementRoutes from './routes/announcement.routes.js';
 import authRoutes from './routes/auth.routes.js';
 import itemRoutes from './routes/item.routes.js';
 import claimRoutes from './routes/claim.routes.js';
+import notificationRoutes from './routes/notification.routes.js';
 import createDefaultAdmin from './utils/seedAdmin.js';
 
 // Load environment variables
@@ -64,6 +65,7 @@ app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/announcements', announcementRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/claims', claimRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Test Route
 app.get('/api/test', (req, res) => {

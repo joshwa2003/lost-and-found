@@ -1,14 +1,49 @@
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const DashboardLayout = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [unreadCount, setUnreadCount] = useState(0);
 
     const isAdmin = user?.role === 'admin';
+
+    // Fetch notifications count
+    useEffect(() => {
+        if (!user) return;
+
+        const fetchCount = async () => {
+            try {
+                // We can filter on frontend or add specific endpoint. 
+                // Getting all is fine for now as we don't expect thousands.
+                const { getNotifications } = await import('../services/notificationService');
+                const response = await getNotifications();
+                if (response.success) {
+                    const unread = response.data.filter(n => !n.isRead).length;
+                    setUnreadCount(unread);
+                }
+            } catch (err) {
+                console.error('Failed to fetch notifications count', err);
+            }
+        };
+
+        fetchCount();
+
+        // Listen for internal updates
+        const handleUpdate = () => fetchCount();
+        window.addEventListener('notificationUpdated', handleUpdate);
+
+        // Simple polling every 30 seconds for new alerts
+        const interval = setInterval(fetchCount, 30000);
+
+        return () => {
+            window.removeEventListener('notificationUpdated', handleUpdate);
+            clearInterval(interval);
+        };
+    }, [user]);
 
     const handleLogout = () => {
         logout();
@@ -70,6 +105,18 @@ const DashboardLayout = () => {
 
                         {/* Desktop User Menu */}
                         <div className="hidden md:flex items-center space-x-4">
+
+                            {/* Notification Bell */}
+                            {!isAdmin && (
+                                <Link to="/user/notifications" className="relative p-2 text-slate-500 hover:text-sky-600 transition-colors">
+                                    <span className="text-xl">🔔</span>
+                                    {unreadCount > 0 && (
+                                        <span className="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center ring-2 ring-white">
+                                            {unreadCount > 9 ? '9+' : unreadCount}
+                                        </span>
+                                    )}
+                                </Link>
+                            )}
                             {/* User Info */}
                             <div className="flex items-center space-x-3 px-4 py-2 bg-slate-50 rounded-lg">
                                 <div className="w-10 h-10 bg-sky-500 rounded-lg flex items-center justify-center text-white font-bold">
