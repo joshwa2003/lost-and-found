@@ -33,8 +33,19 @@ const itemSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            enum: ['available', 'claimed'],
+            enum: ['available', 'claimed', 'collected'],
             default: 'available'
+        },
+        collectedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        collectedDate: {
+            type: Date
+        },
+        isArchived: {
+            type: Boolean,
+            default: false
         }
     },
     {

@@ -4,7 +4,8 @@ import {
     getAllItems,
     getItemById,
     deleteItem,
-    updateItemStatus
+    updateItemStatus,
+    markItemAsCollected
 } from '../controllers/item.controller.js';
 import { protect, authorize } from '../middleware/auth.middleware.js';
 import upload, { handleMulterError } from '../middleware/upload.js';
@@ -51,5 +52,12 @@ router.delete('/:id', protect, authorize('admin'), deleteItem);
  * @access  Private/Admin
  */
 router.put('/:id/status', protect, authorize('admin'), updateItemStatus);
+
+/**
+ * @route   PUT /api/items/:id/complete
+ * @desc    Mark item as collected (archive)
+ * @access  Private/Admin
+ */
+router.put('/:id/complete', protect, authorize('admin'), markItemAsCollected);
 
 export default router;

@@ -74,7 +74,22 @@ export const getAllItems = async (req, res) => {
         let query = {};
 
         // Filter by status (default to available)
-        query.status = status || 'available';
+        if (status) {
+            query.status = status;
+        } else {
+            // Default: show available items, NOT archived
+            query.status = 'available';
+            query.isArchived = false;
+        }
+
+        // If explicitly asking for archived/collected (e.g. for Admin history), handle it in separate admin route or param
+        // For public API, we generally hide archived. 
+        // Let's allow overriding isArchived if needed (e.g. status=collected)
+        if (status === 'collected') {
+            delete query.status; // status conflict if we just set it above
+            query.status = 'collected';
+            delete query.isArchived; // Allow archived
+        }
 
         // Search functionality (optional)
         if (search) {
@@ -216,6 +231,60 @@ export const updateItemStatus = async (req, res) => {
         res.status(200).json({
             success: true,
             message: 'Item status updated successfully',
+            item
+        });
+    } catch (error) {
+        if (error.kind === 'ObjectId') {
+            return res.status(404).json({
+                success: false,
+                message: 'Item not found'
+            });
+        }
+
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+/**
+ * @desc    Mark item as collected (archived)
+ * @route   PUT /api/items/:id/complete
+ * @access  Private/Admin
+ */
+export const markItemAsCollected = async (req, res) => {
+    try {
+        const { collectedBy } = req.body; // user ID who collected it
+
+        const item = await Item.findById(req.params.id);
+
+        if (!item) {
+            return res.status(404).json({
+                success: false,
+                message: 'Item not found'
+            });
+        }
+
+        if (item.status === 'collected') {
+            return res.status(400).json({
+                success: false,
+                message: 'Item is already marked as collected'
+            });
+        }
+
+        // Update Item
+        item.status = 'collected';
+        item.isArchived = true;
+        item.collectedDate = new Date();
+        if (collectedBy) {
+            item.collectedBy = collectedBy;
+        }
+
+        await item.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Item marked as collected and archived',
             item
         });
     } catch (error) {

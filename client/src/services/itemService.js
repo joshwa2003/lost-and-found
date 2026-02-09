@@ -78,3 +78,18 @@ export const updateItemStatus = async (id, status) => {
         throw error.response?.data || error.message;
     }
 };
+
+/**
+ * Mark item as collected (archive) - Admin only
+ * @param {string} id - Item ID
+ * @param {string} userId - ID of user who collected it
+ * @returns {Promise} API response
+ */
+export const markItemCollected = async (id, userId) => {
+    try {
+        const response = await api.put(`/items/${id}/complete`, { collectedBy: userId });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || error.message;
+    }
+};

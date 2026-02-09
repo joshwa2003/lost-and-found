@@ -121,10 +121,10 @@ export const updateClaimStatus = async (req, res) => {
         const claimId = req.params.id;
 
         // Validate status
-        if (!['approved', 'rejected'].includes(status)) {
+        if (!['approved', 'rejected', 'collected'].includes(status)) {
             return res.status(400).json({
                 success: false,
-                message: 'Invalid status. Must be "approved" or "rejected"'
+                message: 'Invalid status. Must be "approved", "rejected" or "collected"'
             });
         }
 
@@ -136,7 +136,8 @@ export const updateClaimStatus = async (req, res) => {
             });
         }
 
-        if (claim.status !== 'pending') {
+        // Allow transition from approved to collected
+        if (claim.status !== 'pending' && !(claim.status === 'approved' && status === 'collected')) {
             return res.status(400).json({
                 success: false,
                 message: `Claim is already ${claim.status}`
@@ -176,6 +177,11 @@ export const updateClaimStatus = async (req, res) => {
                 }
             );
 
+        } else if (status === 'collected') {
+            // Just update the claim status
+            claim.status = 'collected';
+            if (adminComment) claim.adminComment = adminComment;
+            await claim.save();
         } else {
             // Just Rejecting
             claim.status = 'rejected';

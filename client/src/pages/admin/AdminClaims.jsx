@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getAllClaims, updateClaimStatus } from '../../services/claimService';
+import { markItemCollected } from '../../services/itemService';
 import AdminClaimTable from '../../components/admin/AdminClaimTable';
 import ClaimActionModal from '../../components/admin/ClaimActionModal';
 import { useAuth } from '../../context/AuthContext';
@@ -85,11 +86,21 @@ const AdminClaims = () => {
 
             // Map action type to status
             let newStatus;
-            if (actionType === 'approve') newStatus = 'approved';
-            else if (actionType === 'reject') newStatus = 'rejected';
-            else if (actionType === 'collected') newStatus = 'collected';
 
-            await updateClaimStatus(selectedClaim._id, newStatus, adminComment);
+            if (actionType === 'collected') {
+                // Special handling for collected items
+                // 1. Mark item as collected (this archives it)
+                await markItemCollected(selectedClaim.itemId._id, selectedClaim.userId._id);
+
+                // 2. Update claim status to collected/completed to keep records consistent
+                await updateClaimStatus(selectedClaim._id, 'collected', adminComment);
+            } else {
+                // Normal status update
+                if (actionType === 'approve') newStatus = 'approved';
+                else if (actionType === 'reject') newStatus = 'rejected';
+
+                await updateClaimStatus(selectedClaim._id, newStatus, adminComment);
+            }
 
             // Refresh Data
             await fetchClaims();

@@ -20,6 +20,7 @@ const DashboardLayout = () => {
         { name: 'Add Item', path: '/admin/add-item', icon: '➕' },
         { name: 'Manage Items', path: '/admin/manage-items', icon: '📦' },
         { name: 'Manage Claims', path: '/admin/claims', icon: '📝' },
+        { name: 'History', path: '/admin/history', icon: '📜' },
     ];
 
     const userNavItems = [
