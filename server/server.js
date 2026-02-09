@@ -38,7 +38,18 @@ const corsOptions = {
 // Middleware
 app.use(cors(corsOptions)); // Enable CORS with configuration
 app.use(express.json()); // Body parser
-app.use(helmet()); // Security headers
+
+// Helmet with CSP configured to allow images
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+      "img-src": ["'self'", "data:", "http://localhost:5001", "http://127.0.0.1:5001"],
+    },
+  },
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
 app.use(morgan('dev')); // Logging
 
 // Serve static files from uploads folder
