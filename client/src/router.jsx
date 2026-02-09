@@ -7,7 +7,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
-import AddLostItem from './pages/admin/AddLostItem';
+import AddItem from './pages/admin/AddItem';
 import ManageItems from './pages/admin/ManageItems';
 
 // User Pages
@@ -45,7 +45,7 @@ const router = createBrowserRouter([
             },
             {
                 path: 'add-item',
-                element: <AddLostItem />,
+                element: <AddItem />,
             },
             {
                 path: 'manage-items',
