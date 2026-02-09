@@ -69,12 +69,12 @@ export const addItem = async (req, res) => {
  */
 export const getAllItems = async (req, res) => {
     try {
-        const { search, status } = req.query;
+        const { search, status, location, date, sort, startDate, endDate } = req.query;
 
         // Build query
         let query = {};
 
-        // Filter by status (default to available)
+        // 1. Status Filter
         if (status) {
             query.status = status;
         } else {
@@ -83,16 +83,14 @@ export const getAllItems = async (req, res) => {
             query.isArchived = false;
         }
 
-        // If explicitly asking for archived/collected (e.g. for Admin history), handle it in separate admin route or param
-        // For public API, we generally hide archived. 
-        // Let's allow overriding isArchived if needed (e.g. status=collected)
+        // Handle specific 'collected' status request (Override default)
         if (status === 'collected') {
-            delete query.status; // status conflict if we just set it above
+            delete query.status;
             query.status = 'collected';
-            delete query.isArchived; // Allow archived
+            delete query.isArchived;
         }
 
-        // Search functionality (optional)
+        // 2. Text Search (Title or Description)
         if (search) {
             query.$or = [
                 { title: { $regex: search, $options: 'i' } },
@@ -101,10 +99,54 @@ export const getAllItems = async (req, res) => {
             ];
         }
 
-        // Get items with user details, sorted by most recent
+        // 3. Location Filter (Exact Match)
+        if (location && location !== 'all') {
+            query.foundLocation = location;
+        }
+
+        // 4. Date Filter
+        // Specific Date
+        if (date) {
+            const searchDate = new Date(date);
+            const nextDay = new Date(date);
+            nextDay.setDate(nextDay.getDate() + 1);
+
+            query.foundDate = {
+                $gte: searchDate,
+                $lt: nextDay
+            };
+        }
+
+        // Date Range
+        if (startDate || endDate) {
+            query.foundDate = {};
+            if (startDate) query.foundDate.$gte = new Date(startDate);
+            if (endDate) query.foundDate.$lte = new Date(endDate);
+        }
+
+        // 5. Sorting
+        let sortOption = { createdAt: -1 }; // Default: Newest first
+
+        switch (sort) {
+            case 'oldest':
+                sortOption = { createdAt: 1 };
+                break;
+            case 'az':
+                sortOption = { title: 1 };
+                break;
+            case 'za':
+                sortOption = { title: -1 };
+                break;
+            case 'recent':
+            default:
+                sortOption = { foundDate: -1, createdAt: -1 };
+                break;
+        }
+
+        // Execute Query
         const items = await Item.find(query)
             .populate('postedBy', 'name email phone')
-            .sort({ foundDate: -1, createdAt: -1 });
+            .sort(sortOption);
 
         res.status(200).json({
             success: true,
