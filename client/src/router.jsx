@@ -9,6 +9,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AddItem from './pages/admin/AddItem';
 import ManageItems from './pages/admin/ManageItems';
+import AdminClaims from './pages/admin/AdminClaims';
 
 // User Pages
 import UserDashboard from './pages/user/UserDashboard';
@@ -51,6 +52,10 @@ const router = createBrowserRouter([
             {
                 path: 'manage-items',
                 element: <ManageItems />,
+            },
+            {
+                path: 'claims',
+                element: <AdminClaims />,
             },
         ],
     },
