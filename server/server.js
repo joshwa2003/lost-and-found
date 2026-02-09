@@ -12,6 +12,7 @@ import planRoutes from './routes/plan.routes.js';
 import subscriptionRoutes from './routes/subscription.routes.js';
 import announcementRoutes from './routes/announcement.routes.js';
 import authRoutes from './routes/auth.routes.js';
+import itemRoutes from './routes/item.routes.js';
 import createDefaultAdmin from './utils/seedAdmin.js';
 
 // Load environment variables
@@ -40,12 +41,16 @@ app.use(express.json()); // Body parser
 app.use(helmet()); // Security headers
 app.use(morgan('dev')); // Logging
 
+// Serve static files from uploads folder
+app.use('/uploads', express.static('uploads'));
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/plans', planRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/announcements', announcementRoutes);
+app.use('/api/items', itemRoutes);
 
 // Test Route
 app.get('/api/test', (req, res) => {
