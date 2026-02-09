@@ -13,6 +13,7 @@ import subscriptionRoutes from './routes/subscription.routes.js';
 import announcementRoutes from './routes/announcement.routes.js';
 import authRoutes from './routes/auth.routes.js';
 import itemRoutes from './routes/item.routes.js';
+import claimRoutes from './routes/claim.routes.js';
 import createDefaultAdmin from './utils/seedAdmin.js';
 
 // Load environment variables
@@ -62,6 +63,7 @@ app.use('/api/plans', planRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/announcements', announcementRoutes);
 app.use('/api/items', itemRoutes);
+app.use('/api/claims', claimRoutes);
 
 // Test Route
 app.get('/api/test', (req, res) => {

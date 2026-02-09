@@ -9,6 +9,50 @@ const generateToken = (id) => {
     });
 };
 
+// @desc    Register a new user
+// @route   POST /api/auth/register
+// @access  Public
+export const registerUser = async (req, res, next) => {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        res.status(400);
+        return next(new Error(errors.array()[0].msg));
+    }
+
+    const { name, email, password, phone, membershipType } = req.body;
+
+    try {
+        let user = await User.findOne({ email });
+
+        if (user) {
+            res.status(400);
+            throw new Error('User already exists');
+        }
+
+        user = await User.create({
+            name,
+            email,
+            password,
+            phone,
+            membershipType
+        });
+
+        res.status(201).json({
+            success: true,
+            token: generateToken(user._id),
+            user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+            },
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 // @desc    Auth user & get token
 // @route   POST /api/auth/login
 // @access  Public
