@@ -66,23 +66,39 @@ const ViewItems = () => {
     };
 
     const handleSearch = (query) => {
-        setFilters(prev => ({ ...prev, search: query }));
+        setFilters(prev => {
+            if (prev.search === query) return prev;
+            return { ...prev, search: query };
+        });
     };
 
     const handleFilterChange = (newFilters) => {
-        setFilters(prev => ({ ...prev, ...newFilters }));
+        setFilters(prev => {
+            // Check if any value actually changed
+            const hasChanged = Object.keys(newFilters).some(key => newFilters[key] !== prev[key]);
+            if (!hasChanged) return prev;
+            return { ...prev, ...newFilters };
+        });
     };
 
     const handleSortChange = (sortValue) => {
-        setFilters(prev => ({ ...prev, sort: sortValue }));
+        setFilters(prev => {
+            if (prev.sort === sortValue) return prev;
+            return { ...prev, sort: sortValue };
+        });
     };
 
     const clearFilters = () => {
-        setFilters({
-            search: '',
-            location: 'all',
-            date: '',
-            sort: 'recent'
+        setFilters(prev => {
+            const defaults = {
+                search: '',
+                location: 'all',
+                date: '',
+                sort: 'recent'
+            };
+            // Simple interaction check or just reset
+            if (prev.search === '' && prev.location === 'all' && prev.date === '' && prev.sort === 'recent') return prev;
+            return defaults;
         });
     };
 

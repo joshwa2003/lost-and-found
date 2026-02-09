@@ -11,6 +11,7 @@ import AddItem from './pages/admin/AddItem';
 import ManageItems from './pages/admin/ManageItems';
 import AdminClaims from './pages/admin/AdminClaims';
 import AdminHistory from './pages/admin/AdminHistory';
+import EditItem from './pages/admin/EditItem';
 
 // User Pages
 import UserDashboard from './pages/user/UserDashboard';
@@ -18,6 +19,8 @@ import ViewItems from './pages/user/ViewItems';
 import ItemDetails from './pages/user/ItemDetails';
 import MyClaims from './pages/user/MyClaims';
 import Notifications from './pages/user/Notifications';
+import MyReports from './pages/user/MyReports';
+
 
 const router = createBrowserRouter([
     {
@@ -56,12 +59,20 @@ const router = createBrowserRouter([
                 element: <ManageItems />,
             },
             {
+                path: 'edit-item/:id',
+                element: <EditItem />,
+            },
+            {
                 path: 'claims',
                 element: <AdminClaims />,
             },
             {
                 path: 'history',
                 element: <AdminHistory />,
+            },
+            {
+                path: 'item-details/:id',
+                element: <ItemDetails />,
             },
         ],
     },
@@ -93,6 +104,10 @@ const router = createBrowserRouter([
             {
                 path: 'notifications',
                 element: <Notifications />,
+            },
+            {
+                path: 'my-reports',
+                element: <MyReports />,
             },
         ],
     },

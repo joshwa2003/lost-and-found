@@ -5,7 +5,9 @@ import {
     getItemById,
     deleteItem,
     updateItemStatus,
-    markItemAsCollected
+    markItemAsCollected,
+    getUserItems,
+    updateItemDetails
 } from '../controllers/item.controller.js';
 import { protect, authorize } from '../middleware/auth.middleware.js';
 import upload, { handleMulterError } from '../middleware/upload.js';
@@ -24,6 +26,13 @@ router.post(
     handleMulterError,
     addItem
 );
+
+/**
+ * @route   GET /api/items/user/me
+ * @desc    Get logged-in user's posted items
+ * @access  Private
+ */
+router.get('/user/me', protect, getUserItems);
 
 /**
  * @route   GET /api/items
@@ -52,6 +61,13 @@ router.delete('/:id', protect, authorize('admin'), deleteItem);
  * @access  Private/Admin
  */
 router.put('/:id/status', protect, authorize('admin'), updateItemStatus);
+
+/**
+ * @route   PUT /api/items/:id
+ * @desc    Update item details
+ * @access  Private/Admin
+ */
+router.put('/:id', protect, authorize('admin'), upload.single('image'), handleMulterError, updateItemDetails);
 
 /**
  * @route   PUT /api/items/:id/complete

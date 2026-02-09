@@ -63,6 +63,62 @@ export const addItem = async (req, res) => {
 };
 
 /**
+ * @desc    Update item details (Admin only)
+ * @route   PUT /api/items/:id
+ * @access  Private/Admin
+ */
+export const updateItemDetails = async (req, res) => {
+    try {
+        const { title, description, foundLocation, foundDate, category } = req.body;
+
+        let item = await Item.findById(req.params.id);
+
+        if (!item) {
+            return res.status(404).json({
+                success: false,
+                message: 'Item not found'
+            });
+        }
+
+        // Update fields
+        item.title = title || item.title;
+        item.description = description || item.description;
+        item.foundLocation = foundLocation || item.foundLocation;
+        item.foundDate = foundDate || item.foundDate;
+        item.category = category || item.category;
+
+        // Update image if new file uploaded
+        if (req.file) {
+            // Delete old image
+            if (item.image) {
+                const oldImagePath = path.join(process.cwd(), 'uploads', item.image);
+                if (fs.existsSync(oldImagePath)) {
+                    fs.unlinkSync(oldImagePath);
+                }
+            }
+            item.image = req.file.filename;
+        }
+
+        await item.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Item updated successfully',
+            item
+        });
+
+    } catch (error) {
+        if (req.file) {
+            fs.unlinkSync(req.file.path);
+        }
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+/**
  * @desc    Get all available items
  * @route   GET /api/items
  * @access  Public
@@ -76,7 +132,13 @@ export const getAllItems = async (req, res) => {
 
         // 1. Status Filter
         if (status) {
-            query.status = status;
+            if (status === 'all') {
+                // Fetch ALL items (including archived/collected)
+                delete query.status;
+                delete query.isArchived;
+            } else {
+                query.status = status;
+            }
         } else {
             // Default: show available items, NOT archived
             query.status = 'available';
@@ -347,6 +409,30 @@ export const markItemAsCollected = async (req, res) => {
             });
         }
 
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+/**
+ * @desc    Get logged-in user's posted items
+ * @route   GET /api/items/user/me
+ * @access  Private
+ */
+export const getUserItems = async (req, res) => {
+    try {
+        const items = await Item.find({ postedBy: req.user._id })
+            .sort({ createdAt: -1 })
+            .populate('postedBy', 'name');
+
+        res.status(200).json({
+            success: true,
+            count: items.length,
+            items
+        });
+    } catch (error) {
         res.status(500).json({
             success: false,
             message: error.message

@@ -93,3 +93,35 @@ export const markItemCollected = async (id, userId) => {
         throw error.response?.data || error.message;
     }
 };
+
+/**
+ * Get logged-in user's posted items
+ * @returns {Promise} API response
+ */
+export const getUserItems = async () => {
+    try {
+        const response = await api.get('/items/user/me');
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || error.message;
+    }
+};
+
+/**
+ * Update item details (Admin only)
+ * @param {string} id - Item ID
+ * @param {FormData} formData - Updated item data
+ * @returns {Promise} API response
+ */
+export const updateItem = async (id, formData) => {
+    try {
+        const response = await api.put(`/items/${id}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || error.message;
+    }
+};

@@ -8,7 +8,7 @@ import ClaimForm from '../../components/ClaimForm';
 const ItemDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, getUserRole } = useAuth();
 
     const [item, setItem] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -101,6 +101,17 @@ const ItemDetails = () => {
 
     // Determine Button State
     const renderActionButton = () => {
+        if (getUserRole() === 'admin') {
+            return (
+                <button
+                    disabled
+                    className="w-full py-4 bg-slate-100 text-slate-500 rounded-xl font-bold text-lg cursor-default flex items-center justify-center border border-slate-200"
+                >
+                    <span className="mr-2">🛡️</span> Admin View Only
+                </button>
+            );
+        }
+
         // 1. If user already claimed it
         if (userClaimStatus) {
             const statusConfig = {
